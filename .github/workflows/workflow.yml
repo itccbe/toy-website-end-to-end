@@ -1,22 +1,26 @@
 name: deploy-toy-website-end-to-end
 concurrency: toy-company
 
-on: 
+on:
   push:
-    branches: 
+    branches:
       - main
   workflow_dispatch:
 
 jobs:
 
+  #Build the application
+  build:
+    uses: itccbe/toy-website-end-to-end/.github/workflows/build.yml@main
+
   # Lint the Bicep file.
   lint:
-    uses: YOUR_GITHUB_USERNAME/toy-website-end-to-end/.github/workflows/lint.yml@main
+    uses: itccbe/toy-website-end-to-end/.github/workflows/lint.yml@main
 
   # Deploy to the test environment.
   deploy-test:
-    uses: YOUR_GITHUB_USERNAME/toy-website-end-to-end/.github/workflows/deploy.yml@main
-    needs: lint
+    uses: itccbe/toy-website-end-to-end/.github/workflows/deploy.yml@main
+    needs: [build, lint]
     with:
       environmentType: Test
       resourceGroupName: ToyWebsiteTest
@@ -27,8 +31,11 @@ jobs:
 
   # Deploy to the production environment.
   deploy-production:
-    uses: YOUR_GITHUB_USERNAME/toy-website-end-to-end/.github/workflows/deploy.yml@main
-    needs: deploy-test
+    uses: itccbe/toy-website-end-to-end/.github/workflows/deploy.yml@main
+    needs:
+    - build
+    - lint
+    - deploy-test
     with:
       environmentType: Production
       resourceGroupName: ToyWebsiteProduction
